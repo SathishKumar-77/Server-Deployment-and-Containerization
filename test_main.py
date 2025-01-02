@@ -152,7 +152,10 @@ TOKEN = jwt.encode(
     },
     SECRET,
     algorithm='HS256'
-)
+).decode('utf-8')  # Decode to string
+
+print("Generated Token:", TOKEN)
+
 
 import main
 
