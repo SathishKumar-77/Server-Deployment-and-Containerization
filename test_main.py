@@ -135,10 +135,12 @@ import json
 import jwt
 import datetime
 import pytest
+from dotenv import load_dotenv
 
-import main
+# Load environment variables from .env file
+load_dotenv()
 
-SECRET = 'TestSecret'
+SECRET = os.getenv('JWT_SECRET', 'TestSecret')  # Ensure this matches the .env file setting
 EMAIL = 'wolf@thedoor.com'
 PASSWORD = 'huff-puff'
 
@@ -152,13 +154,11 @@ TOKEN = jwt.encode(
     algorithm='HS256'
 )
 
-
 @pytest.fixture
 def client():
     os.environ['JWT_SECRET'] = SECRET
     main.APP.config['TESTING'] = True
     client = main.APP.test_client()
-
     yield client
 
 
