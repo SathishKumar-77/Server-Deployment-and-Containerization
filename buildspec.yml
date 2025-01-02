@@ -78,17 +78,11 @@ phases:
       - curl -fsSL https://apt.corretto.aws/corretto.key | gpg --dearmor -o /usr/share/keyrings/corretto-keyring.gpg
       - echo "deb [signed-by=/usr/share/keyrings/corretto-keyring.gpg] https://apt.corretto.aws stable main" | tee /etc/apt/sources.list.d/corretto.list
 
-      # Setup Google Chrome repository properly
-      - curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg
-      - echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] https://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
-
-      # Test network connectivity
-      - curl -I https://google.com || echo "Network connection failed"
-
-      # Update package lists and install required tools
+      # Update system and pip
       - apt-get clean
       - apt-get update
       - apt-get install -y jq iputils-ping
+      - python -m pip install --upgrade pip setuptools wheel
       - pip install --upgrade awscli pytest
 
   pre_build:
@@ -97,7 +91,8 @@ phases:
       - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' simple_jwt_api.yml
       - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
       - export KUBECONFIG=$HOME/.kube/config
-      - pip install -r requirements.txt
+      # Install requirements with detailed error output
+      - pip install -r requirements.txt || (echo "Requirements installation failed. Check versions." && pip install -r requirements.txt -v && exit 1)
       - python -m pytest test_main.py
 
   build:
