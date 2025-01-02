@@ -154,6 +154,8 @@ TOKEN = jwt.encode(
     algorithm='HS256'
 )
 
+import main
+
 @pytest.fixture
 def client():
     os.environ['JWT_SECRET'] = SECRET
