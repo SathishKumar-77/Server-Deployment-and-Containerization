@@ -3,8 +3,15 @@ import logging
 import datetime
 import functools
 import jwt
+from dotenv import load_dotenv
+
+load_dotenv() 
 
 from flask import Flask, jsonify, request, abort
+
+
+GUNICORN_BIND = os.getenv('GUNICORN_BIND', '0.0.0.0:8000')
+GUNICORN_WORKERS = int(os.getenv('GUNICORN_WORKERS', 4)) 
 
 # Ensure environment variables are loaded
 JWT_SECRET = os.getenv('JWT_SECRET', 'abc123abc1234')  # Default value is provided in case it's missing
