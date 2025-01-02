@@ -76,9 +76,9 @@ phases:
       - apt-get clean
       - apt-get update
       - apt-get install -y jq iputils-ping
-      # Clean pip cache and upgrade pip
-      - python -m pip cache purge
-      - python -m pip install --upgrade pip setuptools wheel
+      # Upgrade pip without using cache
+      - python -m pip install --no-cache-dir --upgrade pip setuptools wheel
+      - pip install --no-cache-dir --upgrade awscli pytest
 
   pre_build:
     commands:
@@ -86,7 +86,7 @@ phases:
       - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' simple_jwt_api.yml
       - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
       - export KUBECONFIG=$HOME/.kube/config
-      # Install requirements with better error handling
+      # Install requirements without using cache
       - pip install --no-cache-dir -r requirements.txt
       - python -m pytest test_main.py
 
