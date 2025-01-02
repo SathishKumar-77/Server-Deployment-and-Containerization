@@ -81,6 +81,9 @@ phases:
       - apt-get update -o Debug::Acquire::http=true
       - apt-get install -y jq iputils-ping
       - pip install --upgrade awscli pytest
+     
+      - curl -fsSL https://dl.google.com/linux/linux_signing_key.pub -o linux_signing_key.pub
+      - apt-key add linux_signing_key.pub
   pre_build:
     commands:
       - TAG="$REPOSITORY_NAME.$REPOSITORY_BRANCH.$ENVIRONMENT_NAME.$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
@@ -88,6 +91,7 @@ phases:
       - $(aws ecr get-login --no-include-email)
       - export KUBECONFIG=$HOME/.kube/config
       - pip install -r requirements.txt
+      - python -m pytest test_main.py
   build:
     commands:
       - docker build --tag $REPOSITORY_URI:$TAG .
