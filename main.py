@@ -60,7 +60,7 @@ def auth():
     token = _get_jwt(user_data).decode('utf-8')
     return jsonify(token=token)
 
-@app.route('/contents', methods=['GET'])
+@APP.route('/contents', methods=['GET'])
 def decode_jwt():
     if not 'Authorization' in request.headers:
         abort(401)
