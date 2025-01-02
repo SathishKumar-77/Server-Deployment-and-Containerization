@@ -24,19 +24,21 @@ LOG = _logger()
 LOG.debug("Starting with log level: %s" % LOG_LEVEL )
 APP = Flask(__name__)
 
-# The JWT token verification decorator
 def require_jwt(function):
     @functools.wraps(function)
     def decorated_function(*args, **kws):
-        if 'Authorization' not in request.headers:
+        if not 'Authorization' in request.headers:
             abort(401)
-        token = request.headers['Authorization'].replace('Bearer ', '')
+        data = request.headers['Authorization']
+        token = str.replace(str(data), 'Bearer ', '')
         try:
             jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-        except Exception:
+        except:
             abort(401)
+
         return function(*args, **kws)
     return decorated_function
+
 
 # Route handlers
 @APP.route('/', methods=['POST', 'GET'])
@@ -58,16 +60,23 @@ def auth():
     token = _get_jwt(user_data).decode('utf-8')
     return jsonify(token=token)
 
-@APP.route('/contents', methods=['GET'])
+@app.route('/contents', methods=['GET'])
 def decode_jwt():
-    if 'Authorization' not in request.headers:
+    if not 'Authorization' in request.headers:
         abort(401)
-    token = request.headers['Authorization'].replace('Bearer ', '')
+    data = request.headers['Authorization']
+    print("Authorization header:", data)  # Debugging line
+    token = str.replace(str(data), 'Bearer ', '')
     try:
         data = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
-    except Exception:
+        print("Decoded data:", data)  # Debugging line
+    except Exception as e:
+        print("JWT decode error:", e)  # Debugging line
         abort(401)
-    return jsonify({'email': data['email'], 'exp': data['exp'], 'nbf': data['nbf']})
+
+    response = {'email': data['email'], 'exp': data['exp'], 'nbf': data['nbf']}
+    return jsonify(**response)
+
 
 # Helper function to create JWT token
 def _get_jwt(user_data):
